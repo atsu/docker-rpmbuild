@@ -46,7 +46,7 @@ You can also specify to place the results in a subdirectory:
 
 ```sh
 docker run [--rm] -v /path/to/source:/src -w /src setheck/rpmbuild \
-  -s MYSPEC.spec OUTDIR
+  -s MYSPEC.spec -o OUTDIR
 ```
 
 This will create `OUTDIR` if necessary and place the results in
@@ -84,7 +84,7 @@ will drop to the shell instead of running rpmbuild, e.g.:
 
 ```sh
 docker run -it -e VERBOSE=1 --rm --volume=$PWD:/src --workdir=/src \
-  setheck/rpmbuild --sh MYPROJ.spec
+  setheck/rpmbuild --sh -s MYPROJ.spec
 ```
 
 From there you can inspect the environment and you can run the build
