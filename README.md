@@ -29,7 +29,8 @@ containing the sources (mounted from the host).
 Typical usage:
 
 ```sh
-docker run [--rm] -v /path/to/source:/src -w /src Setheck/rpmbuild -s MYSPEC.spec
+docker run [--rm] -v /path/to/source:/src -w /src Setheck/rpmbuild \
+  -s MYSPEC.spec
 ```
 
 For help with usage, you can also consult the -h|--help flag
@@ -44,7 +45,8 @@ directory.
 You can also specify to place the results in a subdirectory:
 
 ```sh
-docker run [--rm] -v /path/to/source:/src -w /src Setheck/rpmbuild -s MYSPEC.spec OUTDIR
+docker run [--rm] -v /path/to/source:/src -w /src Setheck/rpmbuild \
+  -s MYSPEC.spec OUTDIR
 ```
 
 This will create `OUTDIR` if necessary and place the results in
@@ -56,7 +58,8 @@ that should contain an inline script or command to add the repo you
 need.  E.g. for EPEL do:
 
 ```sh
-docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" -v /path/to/source:/src -w /src Setheck/rpmbuild -s MYSPEC.spec
+docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" \
+  -v /path/to/source:/src -w /src Setheck/rpmbuild -s MYSPEC.spec
 ```
 
 You can also gpg sign all resulting RPMs by specifying the signing name,
@@ -65,8 +68,9 @@ your keyfile in the source directory with your sources and spec file.
 E.g.
 
 ```sh
-docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" -v /path/to/source:/src -w /src Setheck/rpmbuild \
--s MYSPEC.spec -a "SETH;seth_key.asc;supersecretpw"
+docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" \
+  -v /path/to/source:/src -w /src Setheck/rpmbuild \
+  -s MYSPEC.spec -a "SETH;seth_key.asc;supersecretpw"
 ```
 
 Debugging
