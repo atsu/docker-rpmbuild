@@ -1,4 +1,4 @@
-docker-rpmbuild
+rpmbuilder
 ===============
 
 A minimal docker rpmbuilder image.
@@ -18,7 +18,8 @@ This repo was forked from [jitakirin/docker-rpmbuild](https://github.com/jitakir
 Supported tags and respective `Dockerfile` links
 ================================================
 
-- [`latest` (centos:7 Dockerfile)](https://github.com/Setheck/docker-rpmbuild/blob/master/Dockerfile) - based on [centos:7](https://registry.hub.docker.com/_/centos/)
+TODO: UPDATE
+- [`centos7` (centos:7 Dockerfile)](https://github.com/atsu/rpmbuilder/blob/master/Dockerfile) - based on [centos:7](https://registry.hub.docker.com/_/centos/)
 
 Usage
 =====
@@ -29,13 +30,13 @@ containing the sources (mounted from the host).
 Typical usage:
 
 ```sh
-docker run [--rm] -v /path/to/source:/src -w /src setheck/rpmbuild \
+docker run [--rm] -v /path/to/source:/src -w /src atsu/rpmbuilder \
   -s MYSPEC.spec
 ```
 
 For help with usage, you can also consult the -h|--help flag
 ```sh
-docker run --rm setheck/rpmbuild -h
+docker run --rm atsu/rpmbuilder -h
 ```
 
 This will build the project `MYPROJ` in current directory, placing
@@ -45,7 +46,7 @@ directory.
 You can also specify to place the results in a subdirectory:
 
 ```sh
-docker run [--rm] -v /path/to/source:/src -w /src setheck/rpmbuild \
+docker run [--rm] -v /path/to/source:/src -w /src atsu/rpmbuilder \
   -s MYSPEC.spec -o OUTDIR
 ```
 
@@ -59,7 +60,7 @@ need.  E.g. for EPEL do:
 
 ```sh
 docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" \
-  -v /path/to/source:/src -w /src setheck/rpmbuild -s MYSPEC.spec
+  -v /path/to/source:/src -w /src atsu/rpmbuilder -s MYSPEC.spec
 ```
 
 You can also gpg sign all resulting RPMs by specifying the signing name,
@@ -69,7 +70,7 @@ E.g.
 
 ```sh
 docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" \
-  -v /path/to/source:/src -w /src setheck/rpmbuild \
+  -v /path/to/source:/src -w /src atsu/rpmbuilder \
   -s MYSPEC.spec -a "SETH;seth_key.asc;supersecretpw"
 ```
 
@@ -84,7 +85,7 @@ will drop to the shell instead of running rpmbuild, e.g.:
 
 ```sh
 docker run -it -e VERBOSE=1 --rm --volume=$PWD:/src --workdir=/src \
-  setheck/rpmbuild --sh -s MYPROJ.spec
+  atsu/rpmbuilder --sh -s MYPROJ.spec
 ```
 
 From there you can inspect the environment and you can run the build

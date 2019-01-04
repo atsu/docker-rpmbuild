@@ -23,8 +23,8 @@
 # I have forked https://github.com/jitakirin/docker-rpmbuild and modified
 # for my own purposes.
 
-FROM centos:7
-MAINTAINER Seth T <setheck@gmail.com>
+FROM centos:6
+MAINTAINER atsu.io Operations <ops+rpm@atsu.io>
 
 RUN yum install -y rpmdevtools rpm-sign expect yum-utils gpg createrepo_c && \
     yum clean all && \

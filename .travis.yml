@@ -1,0 +1,25 @@
+branches:
+  only:
+  - master
+sudo: required
+services: docker
+before_script:
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+install:
+- sudo add-apt-repository -y ppa:duggan/bats > /dev/null 2>&1
+- sudo apt-get update
+- sudo apt-get install bats
+script:
+- make build
+before_deploy:
+- make push
+deploy:
+  provider: releases
+  name: "$GIT_TAG"
+  api_key: "$GITHUB_TOKEN"
+  on:
+    condition: "$ATSU_RELEASE = true"
+notifications:
+  slack:
+    rooms:
+      secure: piCwM6hf3hMBMupeWXnPvo0wg/dooPp3e5m3B2EvOA2ZgQnwbiShnd53hp9c5aUR1NMx+q6GrrmOu1S3Ft4mglwsWZ9uikVJJdKIkBJOfTxqjLo9PoFCa6aASebnxneh9xfq6zpc+xy68Z7sPM0/db7akTzeQX93lwwqcKyBcjmK+JJ6X0cfjIGh44fmuR54dme5yQyCDMUnEDSnr09OjGYGk98hyti2CEwCD7WZBEt5uopgmdgmnaGUXcNJeup75lDhfkm8sLCvUH+q86C7ZHDgeLNZF/IpT7YiAKm/fSip0bw2rrg7pSS8X5ZlSDSiDJufD0n5JKeBbdh/aSPcqILKCqj5bsHuve86m/cMXN17Ux+ur3XrL9OiPsIqrNPikoBciberNBGZ0kVqvb0m8evpngEcnANhUlM421PTEvnsa3VBrLIBa8DuifE74J+ppeBowXWrMQzxtc+cnwKUL5ewJdkqqB5hAmxJkRFkL/ooG0DD4PUrRPMsi+fv9sH9FVuxGVlmJIAfEWukFqJUwWYObz6jtSjzRqyHmvyvUYEriq9SobQDRg/HXorRNYmWCRwttg0+a+DUy3v2ofq1H6Lj63zibkMC9QlnZljbYC//kkMHeeCF+jEcHtbUu+XIsbCKaFBHVSdBhU+EoKgNjWqd62dRRJek0MfU99srZ+0=

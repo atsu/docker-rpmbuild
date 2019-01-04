@@ -1,6 +1,6 @@
 #!/bin/bash
 # Copyright 2015-2016 jitakirin
-# Modified by Setheck 6/28/2018
+# Modified by Setheck 1/03/2019
 #
 # This file is part of docker-rpmbuild.
 #
@@ -17,59 +17,46 @@
 # You should have received a copy of the GNU General Public License
 # along with docker-rpmbuild.  If not, see <http://www.gnu.org/licenses/>.
 
-set -e ${VERBOSE:+-x}
+function usage() {
+  if [ -n "$1" ]; then
+    echo -e "${RED}👉 $1${CLEAR}\n";
+  fi
+  echo "Typical usage is "
+  echo "docker run [--rm] -v /path/to/source:/src -w /src rpmbuild -s SPECFILE [-a \"NAME;KEYFILE;PASSWORD\"] [-o OUTDIR]" >&2
+  echo "Options: " >&2
+  echo "  --sh         Drop to shell for debugging" >&2
+  echo "  -s|--spec    Set spec file" >&2
+  echo "  -o|--outdir  Set output directory, defaults to '.'" >&2
+  echo "  -a|--sign    Set info for RPM signing, required to have 3 segments" >&2
+  echo "               encased in quotes delimited by ';' ex: \"<Name>;<KeyFile>;<Password>\""
+  echo "  -v, --verbose   Turn on verbose mode" >&2
+  echo "  -h|--help    this help text." >&2
+  echo "" >&2
+  exit 2
+}
 
-DEBUG=false
-BUILD=true
-while [[ $# -gt 0 ]]
-do
-KEY="$1"
-case $KEY in
-    --sh)
-    BUILD=false
-    shift #past argument
-    ;;
-    -s|--spec)
-    SPEC="$2"
-    shift # past argument
-    shift # past value
-    ;;
-    -o|--outdir)
-    OUTDIR="$2"
-    shift # past argument
-    shift # past value
-    ;;
-    -a|--sign)
-    SIGNATURE=(${2//;/ })
-    if [ ${#SIGNATURE[@]} -ne 3 ]; then
+function verifyOptions() {
+    if [ -n "${SIGNATURE}" ] && [ ${#SIGNATURE[@]} -ne 3 ]; then
       echo -e "Signature is required to have 3 segments delimited by ';'" \
         "\"<Name>;<KeyFile>;<Password>\"" >&2
       exit 2
     fi
-    shift # past argument
-    shift # past value
-    ;;
-    -h|--help)
-    echo -e "Typical usage is " \
-      "\ndocker run [--rm] -v /path/to/source:/src -w /src rpmbuild -s SPECFILE [-a \"NAME;KEYFILE;PASSWORD\"]" \
-      "[-o OUTDIR]" >&2
-    echo -e "\nOptions: " \
-         "\n--sh         Drop to shell for debugging" \
-         "\n-s|--spec    Set spec file" \
-         "\n-o|--outdir  Set output directory, defaults to '.'" \
-         "\n-a|--sign    Set info for RPM signing, required to have 3 segments" \
-         "\n             encased in quotes delimited by ';' ex: \"<Name>;<KeyFile>;<Password>\"" \
-         "\n-h|--help    this help text." >&2
-    exit 2
-    ;;
-    *)
-    if ${VERBOSE:+true}; then 
-      echo "Unknown arg: $1"
-    fi
-    shift
-    ;;
-esac
-done
+}
+
+DEBUG=false
+BUILD=true
+# parse params
+while [[ "$#" > 0 ]]; do case $1 in
+  --sh)         BUILD=false;shift;;
+  -s|--spec)    SPEC="$2";shift;shift;;
+  -o|--outdir)  OUTDIR="$2";shift;shift;;
+  -a|--sign)    SIGNATURE=(${2//;/ });shift;shift;;
+  -v|--verbose) VERBOSE=1;shift;;
+  -h|--help)    usage;;
+  *) usage "Unknown parameter passed: $1"; shift; shift;;
+esac; done
+
+verifyOptions # Verify incoming values
 
 OUTDIR="${OUTDIR:-$PWD}"
 SIGN_NAME=${SIGNATURE[0]}
@@ -112,7 +99,7 @@ if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
   #TODO: verify keyfile import success
   #for each RPM created, attempt to sign
   find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
-    -exec runuser -u rpmbuild /usr/bin/expect /usr/local/bin/docker-rpm-sign.sh {} "$SIGN_NAME" "$SIGN_PASS" \;
+     -exec runuser -u rpmbuild /usr/bin/expect /usr/local/bin/docker-rpm-sign.sh {} "$SIGN_NAME" "$SIGN_PASS" \;
   #TODO: verify signing?
 fi
 
