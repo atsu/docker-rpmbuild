@@ -1,3 +1,6 @@
+test:
+	bats **/**/*.bats
+	
 build:
 	make -C centos
 
