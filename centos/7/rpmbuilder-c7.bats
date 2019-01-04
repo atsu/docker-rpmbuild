@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-setup() {
-    docker pull "atsuio/rpmbuilder:centos7" >&2
-}
+#setup() {
+#    docker pull "atsuio/rpmbuilder:centos7" >&2
+#}
 
-@test "centos version is correct" {
+@test "centos 7 version is correct" {
   run docker run --entrypoint "cat" "atsuio/rpmbuilder:centos7" /etc/os-release
   [ $status -eq 0 ]
   [ "${lines[0]}" = 'NAME="CentOS Linux"' ]
