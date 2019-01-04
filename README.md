@@ -18,8 +18,8 @@ This repo was forked from [jitakirin/docker-rpmbuild](https://github.com/jitakir
 Supported tags and respective `Dockerfile` links
 ================================================
 
-TODO: UPDATE
 - [`centos7` (centos:7 Dockerfile)](https://github.com/atsu/rpmbuilder/blob/master/Dockerfile) - based on [centos:7](https://registry.hub.docker.com/_/centos/)
+- [`centos6` (centos:6 Dockerfile)](https://github.com/atsu/rpmbuilder/blob/initial/centos/6/Dockerfile) - based on [centos:6](https://registry.hub.docker.com/_/centos/)
 
 Usage
 =====
