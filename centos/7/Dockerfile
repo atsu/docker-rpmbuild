@@ -24,12 +24,12 @@
 # for my own purposes.
 
 FROM centos:7
-MAINTAINER Seth T <setheck@gmail.com>
+MAINTAINER atsu.io Operations <ops+rpm@atsu.io>
 
 RUN yum install -y rpmdevtools rpm-sign expect yum-utils gpg createrepo_c && \
     yum clean all && \
     rm -r -f /var/cache/*
-ADD docker-init.sh docker-rpm-build.sh docker-rpm-sign.sh /usr/local/bin/
+COPY docker-init.sh docker-rpm-build.sh docker-rpm-sign.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-*.sh
 
 RUN useradd rpmbuild
