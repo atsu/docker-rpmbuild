@@ -16,7 +16,6 @@ before_deploy:
 - make push
 deploy:
   provider: releases
-  name: "$GIT_TAG"
   api_key: "$GITHUB_TOKEN"
   on:
     condition: "$ATSU_RELEASE = true"
