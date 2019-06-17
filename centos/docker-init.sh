@@ -92,6 +92,8 @@ fi
 # execute the build as rpmbuild user
 runuser rpmbuild /usr/local/bin/docker-rpm-build.sh "$SPEC"
 
+/usr/local/bin/docker-rpm-import.sh
+
 # if name, keyfile, and pass are provide, sign the rpms
 if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
   # attempt to import the keyfile
@@ -100,17 +102,12 @@ if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
   #for each RPM created, attempt to sign
   find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
      -exec runuser -u rpmbuild /usr/bin/expect /usr/local/bin/docker-rpm-sign.sh {} "$SIGN_NAME" "$SIGN_PASS" \;
-  # verify package (NOT OK indicates failure)
-  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" -exec runuser -u rpmbuild -- /usr/bin/rpmkeys -K {} \; | grep -q 'NOT OK'
+  # verify signature
+  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
+     -exec runuser -u rpmbuild /usr/local/bin/docker-rpm-verify.sh {} \; | grep -q 'FAILED'
   if [ $? -eq 0 ]; then
-    echo 'Failed to verify RPM package'
-    exit 1
-  fi
-  # verify signature (absence of "pgp" indicates no key)
-  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" -exec runuser -u rpmbuild -- /usr/bin/rpmkeys -K {} \; | grep -q -v pgp
-  if [ $? -ne 1 ]; then
-    echo 'Failed to verify RPM signature'
-    exit 1
+	  echo "RPM verification failed."
+	  exit 1
   fi
 fi
 

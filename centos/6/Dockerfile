@@ -29,8 +29,9 @@ MAINTAINER atsu.io Operations <ops+rpm@atsu.io>
 RUN yum install -y rpmdevtools rpm-sign expect yum-utils gpg createrepo_c && \
     yum clean all && \
     rm -r -f /var/cache/*
-COPY docker-init.sh docker-rpm-build.sh docker-rpm-sign.sh /usr/local/bin/
+COPY docker-init.sh docker-rpm-build.sh docker-rpm-sign.sh docker-rpm-verify.sh docker-rpm-import.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-*.sh
+ADD keys /keys
 
 RUN useradd rpmbuild
 USER rpmbuild
