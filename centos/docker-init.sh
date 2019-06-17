@@ -100,7 +100,18 @@ if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
   #for each RPM created, attempt to sign
   find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
      -exec runuser -u rpmbuild /usr/bin/expect /usr/local/bin/docker-rpm-sign.sh {} "$SIGN_NAME" "$SIGN_PASS" \;
-  #TODO: verify signing?
+  # verify package (NOT OK indicates failure)
+  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" -exec runuser -u rpmbuild -- /usr/bin/rpmkeys -K {} \; | grep -q 'NOT OK'
+  if [ $? -eq 0 ]; then
+    echo 'Failed to verify RPM package'
+    exit 1
+  fi
+  # verify signature (absence of "pgp" indicates no key)
+  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" -exec runuser -u rpmbuild -- /usr/bin/rpmkeys -K {} \; | grep -q -v pgp
+  if [ $? -ne 1 ]; then
+    echo 'Failed to verify RPM signature'
+    exit 1
+  fi
 fi
 
 # copy the results back; done as root as rpmbuild most likely doesn't
