@@ -29,6 +29,8 @@ function usage() {
   echo "  -o|--outdir  Set output directory, defaults to '.'" >&2
   echo "  -a|--sign    Set info for RPM signing, required to have 3 segments" >&2
   echo "               encased in quotes delimited by ';' ex: \"<Name>;<KeyFile>;<Password>\""
+  echo "  -a2          Set info for (second) RPM signing, required to have 3 segments" >&2
+  echo "               encased in quotes delimited by ';' ex: \"<Name>;<KeyFile>;<Password>\""
   echo "  -v, --verbose   Turn on verbose mode" >&2
   echo "  -h|--help    this help text." >&2
   echo "" >&2
@@ -41,6 +43,37 @@ function verifyOptions() {
         "\"<Name>;<KeyFile>;<Password>\"" >&2
       exit 2
     fi
+
+    if [ -n "${SIGNATURE2}" ] && [ ${#SIGNATURE2[@]} -ne 3 ]; then
+      echo -e "Signature is required to have 3 segments delimited by ';'" \
+        "\"<Name>;<KeyFile>;<Password>\"" >&2
+      exit 2
+    fi
+}
+
+function signrpm() {
+  SIGN_NAME=$1
+  SIGN_KEYFILE=$2
+  SIGN_PASS=$3
+
+  echo "Signing with $SIGN_NAME, $SIGN_KEYFILE, $SIGN_PASS"
+
+  # if name, keyfile, and pass are provide, sign the rpms
+  if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
+       # attempt to import the keyfile
+       runuser rpmbuild -c "/usr/bin/gpg --import $SIGN_KEYFILE"
+       #TODO: verify keyfile import success
+       #for each RPM created, attempt to sign
+       find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
+          -exec runuser -u rpmbuild /usr/bin/expect /usr/local/bin/docker-rpm-sign.sh {} "$SIGN_NAME" "$SIGN_PASS" \;
+       # verify signature
+       find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
+          -exec runuser -u rpmbuild /usr/local/bin/docker-rpm-verify.sh {} \; | grep -q 'FAILED'
+       if [ $? -eq 0 ]; then
+               echo "RPM verification failed."
+               exit 1
+       fi
+  fi
 }
 
 DEBUG=false
@@ -51,6 +84,7 @@ while [[ "$#" > 0 ]]; do case $1 in
   -s|--spec)    SPEC="$2";shift;shift;;
   -o|--outdir)  OUTDIR="$2";shift;shift;;
   -a|--sign)    SIGNATURE=(${2//;/ });shift;shift;;
+  -a2)          SIGNATURE2=(${2//;/ });shift;shift;;
   -v|--verbose) VERBOSE=1;shift;;
   -h|--help)    usage;;
   *) usage "Unknown parameter passed: $1"; shift; shift;;
@@ -59,16 +93,26 @@ esac; done
 verifyOptions # Verify incoming values
 
 OUTDIR="${OUTDIR:-$PWD}"
-SIGN_NAME=${SIGNATURE[0]}
-SIGN_KEYFILE=${SIGNATURE[1]}
-SIGN_PASS=${SIGNATURE[2]}
 
 if ${DEBUG}; then
+  SIGN_NAME=${SIGNATURE[0]}
+  SIGN_KEYFILE=${SIGNATURE[1]}
+  SIGN_PASS=${SIGNATURE[2]}
+
+  SIGN2_NAME=${SIGNATURE2[0]}
+  SIGN2_KEYFILE=${SIGNATURE2[1]}
+  SIGN2_PASS=${SIGNATURE2[2]}
+
   echo "SPEC: ${SPEC}" \
    " OUTDIR: ${OUTDIR}" \
    " SIGN_NAME: ${SIGN_NAME}" \
    " SIGN_KEYFILE: ${SIGN_KEYFILE}" \
    " SIGN_PASS: ${SIGN_PASS}" >&2
+
+  echo "SPEC: ${SPEC}" \
+   " SIGN2_NAME: ${SIGN2_NAME}" \
+   " SIGN2_KEYFILE: ${SIGN2_KEYFILE}" \
+   " SIGN2_PASS: ${SIGN2_PASS}" >&2
 fi
 
 if [[ -z ${SPEC} || ! -e ${SPEC} ]]; then
@@ -94,22 +138,12 @@ runuser rpmbuild /usr/local/bin/docker-rpm-build.sh "$SPEC"
 
 /usr/local/bin/docker-rpm-import.sh
 
-# if name, keyfile, and pass are provide, sign the rpms
-if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
-  # attempt to import the keyfile
-  runuser rpmbuild -c "/usr/bin/gpg --import $SIGN_KEYFILE"
-  #TODO: verify keyfile import success
-  #for each RPM created, attempt to sign
-  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
-     -exec runuser -u rpmbuild /usr/bin/expect /usr/local/bin/docker-rpm-sign.sh {} "$SIGN_NAME" "$SIGN_PASS" \;
-  # verify signature
-  find ~rpmbuild/rpmbuild/{RPMS,SRPMS}/ -iname "*rpm" \
-     -exec runuser -u rpmbuild /usr/local/bin/docker-rpm-verify.sh {} \; | grep -q 'FAILED'
-  if [ $? -eq 0 ]; then
-	  echo "RPM verification failed."
-	  exit 1
-  fi
-fi
+signrpm ${SIGNATURE[0]}  ${SIGNATURE[1]}  ${SIGNATURE[2]}
+
+# Clear imported signature
+runuser rpmbuild -c "rm -rf /home/rpmbuild/.gnupg/"
+
+signrpm ${SIGNATURE2[0]} ${SIGNATURE2[1]} ${SIGNATURE2[2]}
 
 # copy the results back; done as root as rpmbuild most likely doesn't
 # have permissions for OUTDIR; ensure ownership of output is consistent
