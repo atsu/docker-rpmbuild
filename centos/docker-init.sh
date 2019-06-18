@@ -56,10 +56,10 @@ function signrpm() {
   SIGN_KEYFILE=$2
   SIGN_PASS=$3
 
-  echo "Signing with $SIGN_NAME, $SIGN_KEYFILE, $SIGN_PASS"
-
   # if name, keyfile, and pass are provide, sign the rpms
   if [ -n "$SIGN_NAME" ] && [ -e "$SIGN_KEYFILE" ] && [ -n "$SIGN_PASS" ]; then
+       echo "Signing with $SIGN_NAME, $SIGN_KEYFILE, $SIGN_PASS"
+
        # attempt to import the keyfile
        runuser rpmbuild -c "/usr/bin/gpg --import $SIGN_KEYFILE"
        #TODO: verify keyfile import success
@@ -73,6 +73,8 @@ function signrpm() {
                echo "RPM verification failed."
                exit 1
        fi
+  else
+       echo "Skipping signatures."
   fi
 }
 
