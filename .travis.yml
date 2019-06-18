@@ -11,7 +11,7 @@ install:
 - sudo apt-get install bats
 - sudo apt-get install -y awscli
 - sudo chmod +x travis-awscredgen.sh
-- ./travis-awscredgen.sh
+- sudo ./travis-awscredgen.sh
 script:
 - make build
 - make test
