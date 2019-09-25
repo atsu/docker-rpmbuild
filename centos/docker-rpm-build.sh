@@ -28,4 +28,5 @@ cp ${VERBOSE:+-v} -a --reflink=auto "${SPEC}" "${TOPDIR}/SPECS/"
 SPEC="${TOPDIR}/SPECS/${SPEC##*/}"
 
 # build the RPMs
+echo rpmbuild ${VERBOSE:+-v} -ba "${SPEC}" ${RPMBUILD_EXTRAS}
 rpmbuild ${VERBOSE:+-v} -ba "${SPEC}" ${RPMBUILD_EXTRAS}
