@@ -30,13 +30,13 @@ containing the sources (mounted from the host).
 Typical usage:
 
 ```sh
-docker run [--rm] -v /path/to/source:/src -w /src atsuio/rpmbuilder \
+docker run [--rm] -v /path/to/source:/src -w /src ghcr.io/atsu/rpmbuilder \
   -s MYSPEC.spec
 ```
 
 For help with usage, you can also consult the -h|--help flag
 ```sh
-docker run --rm atsuio/rpmbuilder -h
+docker run --rm ghcr.io/atsu/rpmbuilder -h
 ```
 
 This will build the project `MYPROJ` in current directory, placing
@@ -46,7 +46,7 @@ directory.
 You can also specify to place the results in a subdirectory:
 
 ```sh
-docker run [--rm] -v /path/to/source:/src -w /src atsuio/rpmbuilder \
+docker run [--rm] -v /path/to/source:/src -w /src ghcr.io/atsu/rpmbuilder \
   -s MYSPEC.spec -o OUTDIR
 ```
 
@@ -60,7 +60,7 @@ need.  E.g. for EPEL do:
 
 ```sh
 docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" \
-  -v /path/to/source:/src -w /src atsuio/rpmbuilder -s MYSPEC.spec
+  -v /path/to/source:/src -w /src ghcr.io/atsu/rpmbuilder -s MYSPEC.spec
 ```
 
 You can also gpg sign all resulting RPMs by specifying the signing name,
@@ -70,7 +70,7 @@ E.g.
 
 ```sh
 docker run --rm -e PRE_BUILDDEP="yum install -y epel-release" \
-  -v /path/to/source:/src -w /src atsuio/rpmbuilder \
+  -v /path/to/source:/src -w /src ghcr.io/atsu/rpmbuilder \
   -s MYSPEC.spec -a "SETH;seth_key.asc;supersecretpw"
 ```
 
@@ -85,7 +85,7 @@ will drop to the shell instead of running rpmbuild, e.g.:
 
 ```sh
 docker run -it -e VERBOSE=1 --rm --volume=$PWD:/src --workdir=/src \
-  atatsuiosu/rpmbuilder --sh -s MYPROJ.spec
+  atghcr.io/atsusu/rpmbuilder --sh -s MYPROJ.spec
 ```
 
 From there you can inspect the environment and you can run the build
