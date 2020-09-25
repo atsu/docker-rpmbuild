@@ -3,7 +3,7 @@ LATEST := $(IMAGE_NAME):latest
 
 .PHONY: keys build push
 
-build: keys
+build:
 	docker build -t $(IMAGE_NAME):centos6 -f 6/Dockerfile .
 	docker build -t $(IMAGE_NAME):centos7 -t $(LATEST) -f 7/Dockerfile .
 
