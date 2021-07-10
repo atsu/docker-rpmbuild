@@ -6,6 +6,7 @@ LATEST := $(IMAGE_NAME):latest
 build: keys
 	docker build -t $(IMAGE_NAME):centos6 -f 6/Dockerfile .
 	docker build -t $(IMAGE_NAME):centos7 -t $(LATEST) -f 7/Dockerfile .
+	docker build -t $(IMAGE_NAME):centos8 -f 8/Dockerfile .
 
 keys:
 	mkdir -p keys
@@ -13,6 +14,7 @@ keys:
 push:
 	docker push $(IMAGE_NAME):centos6
 	docker push $(IMAGE_NAME):centos7
+	docker push $(IMAGE_NAME):centos8
 	docker push $(LATEST)
 
 clean:
